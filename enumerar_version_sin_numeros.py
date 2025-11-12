@@ -91,12 +91,21 @@ def create_single_page_numbers(image_path,
 
         current += 1
 
-    png_out = os.path.join(output_folder, f"page_{start:03d}_{end:03d}.png")
-    pdf_out = os.path.join(output_folder, f"page_{start:03d}_{end:03d}.pdf")
+    # Guardar la página con la misma extensión que la imagen fuente si es png/jpg
+    _, src_ext = os.path.splitext(image_path)
+    src_ext = src_ext.lower()
+    if src_ext in (".jpg", ".jpeg"):
+        out_name = f"page_{start:03d}_{end:03d}.jpg"
+        out_path = os.path.join(output_folder, out_name)
+        # Guardar como JPEG (calidad razonable)
+        page.save(out_path, quality=95)
+    else:
+        out_name = f"page_{start:03d}_{end:03d}.png"
+        out_path = os.path.join(output_folder, out_name)
+        page.save(out_path)
 
-    page.save(png_out)
     # No guardamos PDF por página aquí (el usuario quiere un único PDF con todas las imágenes)
-    print(f"Página guardada: {png_out}")
+    print(f"Página guardada: {out_path}")
 
 
 def generate_pages_range(image_path, start, end, rows=3, columns=3, spacing=20, output_folder="output_cards", zero_pad=3, left_rel=(0.10,0.66), right_rel=(0.77,0.73)):
@@ -126,9 +135,14 @@ def combine_page_pngs_to_pdf(output_folder="output_cards", pattern_prefix="page_
     """Combina los PNGs `page_*.png` en un único PDF en orden alfabético (numérico)."""
     import glob
 
+    # Buscar PNGs y JPGs generados (en orden numérico/alfa)
     png_paths = sorted(glob.glob(os.path.join(output_folder, f"{pattern_prefix}*.png")))
+    jpg_paths = sorted(glob.glob(os.path.join(output_folder, f"{pattern_prefix}*.jpg")))
+    png_paths.extend(jpg_paths)
+    png_paths = sorted(png_paths)
+
     if not png_paths:
-        print("No se encontraron PNGs para combinar.")
+        print("No se encontraron imágenes para combinar.")
         return
 
     images = []
@@ -152,7 +166,7 @@ def combine_page_pngs_to_pdf(output_folder="output_cards", pattern_prefix="page_
 if __name__ == "__main__":
     # Generar todas las páginas desde 001 hasta 200 en bloques de 3x3
     generate_pages_range(
-        image_path="version-sin-numeros.png",
+        image_path="version-sin-numeros.jpg",
         start=1,
         end=200,
         rows=3,
