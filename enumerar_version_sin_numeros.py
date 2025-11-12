@@ -178,3 +178,5 @@ if __name__ == "__main__":
         left_rel=(0.10, 0.66),
         right_rel=(0.77, 0.73),
     )
+    # Combinar todas las páginas generadas en un único PDF automáticamente
+    combine_page_pngs_to_pdf(output_folder="output_cards", output_pdf_name="all_pages_000_200.pdf")
