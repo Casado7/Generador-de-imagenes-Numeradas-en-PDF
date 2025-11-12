@@ -131,7 +131,7 @@ def generate_pages_range(image_path, start, end, rows=3, columns=3, spacing=20, 
         n += per_page
 
 
-def combine_page_pngs_to_pdf(output_folder="output_cards", pattern_prefix="page_", output_pdf_name="all_pages_001_200.pdf"):
+def combine_page_pngs_to_pdf(output_folder="output_cards", pattern_prefix="page_", output_pdf_name="all_pages_000_200.pdf"):
     """Combina los PNGs `page_*.png` en un único PDF en orden alfabético (numérico)."""
     import glob
 
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     # Generar todas las páginas desde 001 hasta 200 en bloques de 3x3
     generate_pages_range(
         image_path="version-sin-numeros.jpg",
-        start=1,
+        start=0,
         end=200,
         rows=3,
         columns=3,
