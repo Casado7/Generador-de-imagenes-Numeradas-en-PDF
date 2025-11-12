@@ -126,20 +126,17 @@ def generate_pages_range(image_path, start, end, rows=3, columns=3, spacing=20, 
 
 
 if __name__ == "__main__":
-    # Generar una sola página con 001..009
-    create_single_page_numbers(
+    # Generar todas las páginas desde 001 hasta 200 en bloques de 3x3
+    generate_pages_range(
         image_path="version-sin-numeros.png",
         start=1,
-        end=9,
+        end=200,
         rows=3,
         columns=3,
         spacing=20,
         output_folder="output_cards",
         zero_pad=3,
-        # Posiciones relativas: puedes ajustar si la colocación no queda exactamente
-        # donde quieres. Valores (x_rel, y_rel) entre 0.0 y 1.0 dentro de la tarjeta.
-        # Bajamos un poco el número izquierdo (y_rel aumentó de 0.58 a 0.66)
+        # Posiciones relativas: ajustar si es necesario
         left_rel=(0.10, 0.66),
-        # Bajar un poco el número derecho (aumentar y_rel de 0.68 a 0.72)
         right_rel=(0.77, 0.73),
     )
