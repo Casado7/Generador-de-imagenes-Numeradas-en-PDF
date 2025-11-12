@@ -40,8 +40,9 @@ def create_single_page_numbers(image_path,
         return ImageFont.load_default()
 
     # Tamaños de fuente relativos a la anchura de la tarjeta
-    left_font_size = max(16, int(iw * 0.12))
-    right_font_size = max(24, int(iw * 0.28))
+    # Reducidos para que queden más discretos según petición
+    left_font_size = max(12, int(iw * 0.06))
+    right_font_size = max(18, int(iw * 0.14))
     left_font = load_font(left_font_size)
     right_font = load_font(right_font_size)
 
