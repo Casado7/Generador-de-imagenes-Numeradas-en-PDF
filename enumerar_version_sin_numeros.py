@@ -36,9 +36,35 @@ def create_single_page_numbers(image_path,
     # Crear la página con color blanco
     page = Image.new("RGB", (page_w, page_h), color="white")
 
-    # Centrar la cuadrícula en la página (márgenes izquierdo/arriba)
-    left_margin = max(0, (page_w - content_w) // 2)
-    top_margin = max(0, (page_h - content_h) // 2)
+    # Ajustar escala y espaciado para que las tarjetas ocupen mejor la página
+    # mínimo espacio entre tarjetas
+    min_spacing = 8
+
+    # Calcular el factor máximo de escala que permite que las tarjetas quepan
+    total_min_w = columns * iw + (columns + 1) * min_spacing
+    total_min_h = rows * ih + (rows + 1) * min_spacing
+    # scale_x/scale_y indican cuánto podemos escalar las tarjetas para llenar el ancho/alto
+    scale_x = (page_w - (columns + 1) * min_spacing) / max(columns * iw, 1)
+    scale_y = (page_h - (rows + 1) * min_spacing) / max(rows * ih, 1)
+    # Permitimos escalar hacia arriba hasta un tope razonable (2x) para evitar pixelado extremo
+    max_upscale = 2.0
+    # Usar el factor que permite llenar el espacio sin salirse, limitado por max_upscale
+    scale = max(0.01, min(max_upscale, scale_x, scale_y))
+
+    # Si scale es distinto de 1, redimensionamos la imagen base para que las tarjetas sean más grandes
+    if abs(scale - 1.0) > 0.01:
+        new_iw = max(1, int(iw * scale))
+        new_ih = max(1, int(ih * scale))
+        base = base.resize((new_iw, new_ih), Image.LANCZOS)
+        iw, ih = base.size
+
+    # Calcular espaciado dinámico para distribuir las tarjetas y minimizar márgenes
+    spacing_x = max(min_spacing, (page_w - columns * iw) // (columns + 1))
+    spacing_y = max(min_spacing, (page_h - rows * ih) // (rows + 1))
+
+    # Márgenes izquierdo/arriba igual al espaciado calculado (centra la cuadrícula)
+    left_margin = spacing_x
+    top_margin = spacing_y
 
     # Intentar fuentes comunes, si no, usar por defecto
     def load_font(size):
@@ -179,8 +205,8 @@ if __name__ == "__main__":
         image_path="version-sin-numeros.jpg",
         start=0,
         end=200,
-        rows=5,
-        columns=3,
+        rows=4,
+        columns=2,
         spacing=20,
         output_folder="output_cards",
         zero_pad=3,
