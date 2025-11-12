@@ -95,11 +95,8 @@ def create_single_page_numbers(image_path,
     pdf_out = os.path.join(output_folder, f"page_{start:03d}_{end:03d}.pdf")
 
     page.save(png_out)
-    # Guardar también como PDF (una sola página)
-    page.save(pdf_out, "PDF", resolution=300.0)
-
+    # No guardamos PDF por página aquí (el usuario quiere un único PDF con todas las imágenes)
     print(f"Página guardada: {png_out}")
-    print(f"PDF guardado: {pdf_out}")
 
 
 def generate_pages_range(image_path, start, end, rows=3, columns=3, spacing=20, output_folder="output_cards", zero_pad=3, left_rel=(0.10,0.66), right_rel=(0.77,0.73)):
@@ -123,6 +120,33 @@ def generate_pages_range(image_path, start, end, rows=3, columns=3, spacing=20, 
             right_rel=right_rel,
         )
         n += per_page
+
+
+def combine_page_pngs_to_pdf(output_folder="output_cards", pattern_prefix="page_", output_pdf_name="all_pages_001_200.pdf"):
+    """Combina los PNGs `page_*.png` en un único PDF en orden alfabético (numérico)."""
+    import glob
+
+    png_paths = sorted(glob.glob(os.path.join(output_folder, f"{pattern_prefix}*.png")))
+    if not png_paths:
+        print("No se encontraron PNGs para combinar.")
+        return
+
+    images = []
+    for p in png_paths:
+        im = Image.open(p).convert("RGB")
+        images.append(im)
+
+    out_path = os.path.join(output_folder, output_pdf_name)
+    first, rest = images[0], images[1:]
+    first.save(out_path, save_all=True, append_images=rest)
+    print(f"PDF combinado guardado: {out_path}")
+
+    # Eliminar PDFs por página antiguos si existen (no necesarios)
+    for pdf_file in glob.glob(os.path.join(output_folder, f"{pattern_prefix}*.pdf")):
+        try:
+            os.remove(pdf_file)
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":
