@@ -114,6 +114,7 @@ if __name__ == "__main__":
         zero_pad=3,
         # Posiciones relativas: puedes ajustar si la colocación no queda exactamente
         # donde quieres. Valores (x_rel, y_rel) entre 0.0 y 1.0 dentro de la tarjeta.
-        left_rel=(0.10, 0.58),
+        # Bajamos un poco el número izquierdo (y_rel aumentó de 0.58 a 0.66)
+        left_rel=(0.10, 0.66),
         right_rel=(0.77, 0.68),
     )
