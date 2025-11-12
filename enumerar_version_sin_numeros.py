@@ -11,7 +11,9 @@ def create_single_page_numbers(image_path,
                                output_folder="output_cards",
                                zero_pad=3,
                                left_rel=(0.10, 0.58),
-                               right_rel=(0.77, 0.68)):
+                               right_rel=(0.77, 0.68),
+                               page_size=(3900, 2550),
+                               dpi=300):
     """
     Crear una sola página (PNG + PDF) con una cuadrícula de `rows x columns`
     usando la misma imagen (`image_path`) y numerando cada tarjeta desde
@@ -26,9 +28,17 @@ def create_single_page_numbers(image_path,
     base = Image.open(image_path).convert("RGB")
     iw, ih = base.size
 
-    page_w = columns * iw + (columns + 1) * spacing
-    page_h = rows * ih + (rows + 1) * spacing
+    # Calcular tamaño del área de contenido y crear la página con tamaño oficio horizontal (300 DPI)
+    page_w, page_h = page_size
+    content_w = columns * iw + (columns + 1) * spacing
+    content_h = rows * ih + (rows + 1) * spacing
+
+    # Crear la página con color blanco
     page = Image.new("RGB", (page_w, page_h), color="white")
+
+    # Centrar la cuadrícula en la página (márgenes izquierdo/arriba)
+    left_margin = max(0, (page_w - content_w) // 2)
+    top_margin = max(0, (page_h - content_h) // 2)
 
     # Intentar fuentes comunes, si no, usar por defecto
     def load_font(size):
@@ -86,8 +96,8 @@ def create_single_page_numbers(image_path,
         draw.text(lpos, text, font=left_font, fill="black", stroke_width=2, stroke_fill="white")
         draw.text(rpos, text, font=right_font, fill="black", stroke_width=3, stroke_fill="white")
 
-        # Pegar la tarjeta numerada en la página
-        page.paste(card, (x, y))
+        # Pegar la tarjeta numerada en la página (considerando márgenes para centrar)
+        page.paste(card, (left_margin + x, top_margin + y))
 
         current += 1
 
@@ -97,12 +107,12 @@ def create_single_page_numbers(image_path,
     if src_ext in (".jpg", ".jpeg"):
         out_name = f"page_{start:03d}_{end:03d}.jpg"
         out_path = os.path.join(output_folder, out_name)
-        # Guardar como JPEG (calidad razonable)
-        page.save(out_path, quality=95)
+        # Guardar como JPEG con DPI
+        page.save(out_path, quality=95, dpi=(dpi, dpi))
     else:
         out_name = f"page_{start:03d}_{end:03d}.png"
         out_path = os.path.join(output_folder, out_name)
-        page.save(out_path)
+        page.save(out_path, dpi=(dpi, dpi))
 
     # No guardamos PDF por página aquí (el usuario quiere un único PDF con todas las imágenes)
     print(f"Página guardada: {out_path}")
