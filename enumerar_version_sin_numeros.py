@@ -42,7 +42,8 @@ def create_single_page_numbers(image_path,
     # Tamaños de fuente relativos a la anchura de la tarjeta
     # Reducidos para que queden más discretos según petición
     left_font_size = max(12, int(iw * 0.06))
-    right_font_size = max(18, int(iw * 0.14))
+    # Usar el mismo tamaño para el número derecho que para el izquierdo
+    right_font_size = left_font_size
     left_font = load_font(left_font_size)
     right_font = load_font(right_font_size)
 
@@ -116,5 +117,6 @@ if __name__ == "__main__":
         # donde quieres. Valores (x_rel, y_rel) entre 0.0 y 1.0 dentro de la tarjeta.
         # Bajamos un poco el número izquierdo (y_rel aumentó de 0.58 a 0.66)
         left_rel=(0.10, 0.66),
-        right_rel=(0.77, 0.68),
+        # Bajar un poco el número derecho (aumentar y_rel de 0.68 a 0.72)
+        right_rel=(0.77, 0.73),
     )
