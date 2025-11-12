@@ -102,6 +102,29 @@ def create_single_page_numbers(image_path,
     print(f"PDF guardado: {pdf_out}")
 
 
+def generate_pages_range(image_path, start, end, rows=3, columns=3, spacing=20, output_folder="output_cards", zero_pad=3, left_rel=(0.10,0.66), right_rel=(0.77,0.73)):
+    """
+    Genera múltiples páginas en bloques de rows*columns desde start hasta end.
+    """
+    per_page = rows * columns
+    n = start
+    while n <= end:
+        chunk_end = min(n + per_page - 1, end)
+        create_single_page_numbers(
+            image_path=image_path,
+            start=n,
+            end=chunk_end,
+            rows=rows,
+            columns=columns,
+            spacing=spacing,
+            output_folder=output_folder,
+            zero_pad=zero_pad,
+            left_rel=left_rel,
+            right_rel=right_rel,
+        )
+        n += per_page
+
+
 if __name__ == "__main__":
     # Generar una sola página con 001..009
     create_single_page_numbers(
