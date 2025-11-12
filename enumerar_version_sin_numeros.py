@@ -179,7 +179,7 @@ if __name__ == "__main__":
         image_path="version-sin-numeros.jpg",
         start=0,
         end=200,
-        rows=3,
+        rows=5,
         columns=3,
         spacing=20,
         output_folder="output_cards",
