@@ -1,2 +1,15 @@
 /.venv
 output_cards/
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+test-results/
+playwright-report/
+.env*.local
+.verification/
+public/pdfjs/
+output/
+.vercel/
+.vercel
+.env*

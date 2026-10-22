@@ -1,0 +1,40 @@
+schema: spec-driven
+
+context: |
+  Language: Spanish
+  All artifacts must be written in Spanish.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+  Proyecto: migración de scripts Python/Pillow para preparar boletos de una lotería benéfica a una aplicación Next.js con TypeScript y componentes shadcn/ui.
+  Objetivo: permitir cambiar imágenes, numeración y distribución desde una interfaz en español sin editar código cada año.
+  Arquitectura: generación en el navegador, despliegue estático compatible con Vercel, sin login ni backend de procesamiento.
+  Privacidad: los archivos seleccionados y resultados se mantienen en memoria durante la sesión; no subirlos ni persistirlos en servidor, localStorage, IndexedDB o cachés de aplicación. La descarga explícita al dispositivo es la salida prevista.
+  Aplicar la skill clean-architecture proporcionalmente: reglas de numeración y distribución independientes de React, Next.js, DOM y biblioteca PDF; interfaces pequeñas en los límites de generación.
+  Aplicar la skill shadcn: consultar documentación con CLI y componer los componentes oficiales, respetando sus reglas de formularios, accesibilidad y estilos semánticos.
+  Requisitos de interfaz confirmados: editor visual interactivo sobre el arte, vista previa instantánea de tarjeta/hoja, tamaño de letra y tarjeta ajustables, cantidad por hoja configurable. Usar formularios y componentes shadcn/ui, Sonner para mensajes generales y Zod para validar archivos y configuración en TypeScript.
+  Usar Docker: desarrollo con Compose y una imagen multietapa que sirva la compilación estática para pruebas/ejecución local. Vercel continúa como destino de publicación del proyecto Next.js; no se requiere desplegar el contenedor allí.
+  Estado inicial: solo README, dos scripts Python y cuatro imágenes JPG; no hay aplicación JavaScript ni pruebas existentes.
+  Referencia heredada: enumerar.py genera frente/reverso alternados, reverso numerado, rango inclusivo y cuadrícula configurable. enumerar_version_sin_numeros.py repite un número con ceros en dos posiciones relativas y genera hojas agrupadas en un PDF.
+  No conservar errores de geometría, dependencia de fuentes del sistema, ordenación alfabética de páginas o archivos temporales de los scripts.
+  Conservar scripts e imágenes originales hasta completar y verificar la migración; las imágenes heredadas no se publican automáticamente como recursos de la web.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

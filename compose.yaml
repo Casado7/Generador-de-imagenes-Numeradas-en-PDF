@@ -1,0 +1,27 @@
+name: rifa-estudio
+services:
+  dev:
+    build:
+      context: .
+      target: development
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - .:/app
+      - dependencies:/app/node_modules
+      - next-cache:/app/.next
+    environment:
+      NEXT_TELEMETRY_DISABLED: "1"
+      WATCHPACK_POLLING: "true"
+    init: true
+  preview:
+    profiles: [preview]
+    build:
+      context: .
+      target: production
+    ports:
+      - "127.0.0.1:8080:8080"
+    init: true
+volumes:
+  dependencies:
+  next-cache:

@@ -1,0 +1,15 @@
+.git
+.venv
+node_modules
+.next
+out
+.verification
+output
+output_cards
+test-results
+playwright-report
+public/pdfjs
+*.tsbuildinfo
+*.jpg
+*.py
+.env*

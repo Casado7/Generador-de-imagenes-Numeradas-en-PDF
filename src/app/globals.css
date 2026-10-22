@@ -1,0 +1,108 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: "Noto Sans", Arial, sans-serif;
+  --font-mono: "Noto Sans Mono", monospace;
+}
+:root {
+  --radius: 0.75rem;
+  --background: #f6f5f1;
+  --foreground: #202d2b;
+  --card: #ffffff;
+  --card-foreground: #202d2b;
+  --popover: #ffffff;
+  --popover-foreground: #202d2b;
+  --primary: #24664e;
+  --primary-foreground: #ffffff;
+  --secondary: #eaf0e8;
+  --secondary-foreground: #285840;
+  --muted: #eeeee8;
+  --muted-foreground: #69736e;
+  --accent: #e8eee7;
+  --accent-foreground: #244a38;
+  --destructive: #b33b33;
+  --border: #e0e4db;
+  --input: #dce1d8;
+  --ring: #5d8c6a;
+}
+@font-face {
+  font-family: "Noto Sans";
+  src: url("/fonts/NotoSans-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Sans Mono";
+  src: url("/fonts/NotoSansMono-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    margin: 0;
+  }
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+}
+.editor-grid {
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.ticket-paper {
+  filter: drop-shadow(0 8px 20px #202d2b14);
+}
+::selection {
+  background: var(--secondary);
+}
+.upload-area {
+  border: 1px dashed var(--input);
+  border-radius: var(--radius);
+  padding: 1rem;
+  background: var(--background);
+}
+.summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+}
+.summary-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.summary-list dt {
+  color: var(--muted-foreground);
+}
+.summary-list dd {
+  text-align: right;
+  font-weight: 500;
+}
