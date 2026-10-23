@@ -64,6 +64,7 @@ import {
   fitImage,
   formatNumber,
   planPage,
+  faceIsNumbered,
 } from "../domain/composition";
 import {
   DEFAULT_PROJECT,
@@ -96,6 +97,13 @@ import { Settings } from "./settings";
 import { Properties } from "./properties";
 import { PreviewCanvas } from "./canvas";
 import { Choice } from "./controls";
+import { TransformToolbar } from "./transform-toolbar";
+import { canDuplicate, canRemove } from "./element-actions";
+import {
+  constrainTransform,
+  textEnvelope,
+  type ElementPatch,
+} from "../application/element-transforms";
 
 function makeExample(): Promise<File> {
   const canvas = document.createElement("canvas");
@@ -159,6 +167,7 @@ export function Studio() {
   const [view, setView] = useState("ticket"),
     [zoom, setZoom] = useState(100),
     [pageIndex, setPageIndex] = useState(0);
+  const [transformMessage, setTransformMessage] = useState("");
   const [sample, setSample] = useState(1),
     [format, setFormat] = useState<ExportFormat>("pdf"),
     [dpi, setDpi] = useState<150 | 300>(150);
@@ -203,6 +212,9 @@ export function Studio() {
     if (project.mode === "single") setFace("front");
   }, [project.mode]);
   const activeFace = project.mode === "single" ? "front" : face;
+  const selectedElement = project.elements[activeFace].find(
+    (e) => e.id === selected,
+  );
   const info = useMemo(
     () =>
       Object.fromEntries(
@@ -349,14 +361,84 @@ export function Studio() {
       );
     }
   }
-  function move(id: string, x: number, y: number) {
+  function transform(
+    which: Face,
+    id: string,
+    patch: ElementPatch,
+    restore = false,
+  ) {
+    if ((busy && !restore) || !layout || !fonts) return;
+    const list = form.getValues(`elements.${which}`);
+    const element = list.find((e) => e.id === id);
+    if (!element) return;
+    try {
+      const result = restore
+        ? { element: { ...element, ...patch }, reason: "" }
+        : constrainTransform(
+            element,
+            patch,
+            layout.cardWidth,
+            layout.cardHeight,
+            element.kind !== "cover"
+              ? textEnvelope(element, project.sequence, fonts.metrics)
+              : undefined,
+          );
+      setTransformMessage(result.reason);
+      form.setValue(
+        `elements.${which}`,
+        list.map((e) => (e.id === id ? result.element : e)),
+        { shouldValidate: true, shouldDirty: true },
+      );
+    } catch (e) {
+      setTransformMessage(
+        e instanceof Error ? e.message : "No se pudo ajustar la marca.",
+      );
+    }
+  }
+  function duplicate(id: string) {
+    if (busy || !layout || !fonts) return;
+    const list = form.getValues(`elements.${activeFace}`),
+      element = list.find((e) => e.id === id);
+    if (!element || !canDuplicate(element, list)) return;
+    try {
+      const moved = constrainTransform(
+        element,
+        { x: Math.min(0.85, element.x + 0.1) },
+        layout.cardWidth,
+        layout.cardHeight,
+        element.kind !== "cover"
+          ? textEnvelope(element, project.sequence, fonts.metrics)
+          : undefined,
+      ).element;
+      const next = { ...moved, id: crypto.randomUUID() };
+      form.setValue(`elements.${activeFace}`, [...list, next], {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      setSelected(next.id);
+      setTransformMessage("");
+    } catch (e) {
+      setTransformMessage(
+        e instanceof Error ? e.message : "No se pudo duplicar la marca.",
+      );
+    }
+  }
+  function remove(id: string) {
     if (busy) return;
-    const list = form.getValues(`elements.${activeFace}`);
+    const list = form.getValues(`elements.${activeFace}`),
+      element = list.find((e) => e.id === id);
+    if (
+      !element ||
+      !canRemove(element, list, faceIsNumbered(project, activeFace))
+    )
+      return;
     form.setValue(
       `elements.${activeFace}`,
-      list.map((e) => (e.id === id ? { ...e, x, y } : e)),
+      list.filter((e) => e.id !== id),
       { shouldValidate: true, shouldDirty: true },
     );
+    setSelected(null);
+    setTransformMessage("");
   }
   async function generate() {
     if (!canExport || !fonts) return;
@@ -596,8 +678,37 @@ export function Studio() {
                               </span>
                             </Field>
                           </div>
+                          {view === "ticket" &&
+                            selectedElement &&
+                            selectedElement.kind !== "cover" && (
+                              <TransformToolbar
+                                element={selectedElement}
+                                disabled={busy || !inputsValid || !fonts}
+                                duplicateAllowed={canDuplicate(
+                                  selectedElement,
+                                  project.elements[activeFace],
+                                )}
+                                removeAllowed={canRemove(
+                                  selectedElement,
+                                  project.elements[activeFace],
+                                  faceIsNumbered(project, activeFace),
+                                )}
+                                onChange={(patch) =>
+                                  transform(
+                                    activeFace,
+                                    selectedElement.id,
+                                    patch,
+                                  )
+                                }
+                                onDuplicate={() =>
+                                  duplicate(selectedElement.id)
+                                }
+                                onRemove={() => remove(selectedElement.id)}
+                                message={transformMessage}
+                              />
+                            )}
                           <div
-                            className="editor-grid flex min-h-[410px] items-center overflow-auto p-6 sm:min-h-[500px]"
+                            className="editor-grid flex min-h-[410px] items-center overflow-auto px-16 pb-16 pt-32 sm:min-h-[500px]"
                             data-testid="workspace"
                           >
                             {preview ? (
@@ -609,12 +720,16 @@ export function Studio() {
                                 }}
                               >
                                 <PreviewCanvas
+                                  key={`${activeFace}-${view}`}
                                   page={preview}
                                   urls={urls}
                                   editable={view === "ticket" && !busy}
                                   selected={selected}
-                                  onSelect={setSelected}
-                                  onMove={move}
+                                  onSelect={(id) => {
+                                    setSelected(id);
+                                    setTransformMessage("");
+                                  }}
+                                  onTransform={transform}
                                 />
                               </div>
                             ) : (
@@ -773,6 +888,8 @@ export function Studio() {
                     project={project}
                     face={activeFace}
                     selected={selected}
+                    onDuplicate={duplicate}
+                    onRemove={remove}
                     onSelect={setSelected}
                     busy={busy}
                   />

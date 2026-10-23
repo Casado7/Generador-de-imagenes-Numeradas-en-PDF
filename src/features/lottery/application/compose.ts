@@ -1,8 +1,4 @@
-import {
-  calculateLayout,
-  faceIsNumbered,
-  formatNumber,
-} from "../domain/composition";
+import { calculateLayout, faceIsNumbered } from "../domain/composition";
 import {
   ptToMm,
   type ImageInfos,
@@ -12,6 +8,7 @@ import {
   type Rotation,
 } from "../domain/model";
 import type { FontMetrics, RenderPage, TextRun } from "./ports";
+import { inside, textEnvelope, elementExtent } from "./element-transforms";
 
 // Clockwise quarter turns in the shared top-left coordinate system.
 export function rotatePoint(x: number, y: number, rotation: Rotation) {
@@ -25,21 +22,6 @@ export function rotatePoint(x: number, y: number, rotation: Rotation) {
     default:
       return { x, y };
   }
-}
-function inside(
-  cx: number,
-  cy: number,
-  width: number,
-  height: number,
-  cardWidth: number,
-  cardHeight: number,
-) {
-  return (
-    cx - width / 2 >= -0.0001 &&
-    cx + width / 2 <= cardWidth + 0.0001 &&
-    cy - height / 2 >= -0.0001 &&
-    cy + height / 2 <= cardHeight + 0.0001
-  );
 }
 
 export function prepareProject(
@@ -103,29 +85,25 @@ export function prepareProject(
         ![0, 90, 180, 270].includes(element.rotation ?? 0)
       )
         throw new Error("Revisa el tamaño y el giro de los elementos.");
-      const values =
-        element.kind === "text"
-          ? [element.text]
-          : Array.from({ length: layout.count }, (_, i) =>
-              formatNumber(project.sequence.start + i, project.sequence),
-            );
-      for (const value of values) {
-        const m = metrics.measure(value, element.font, element.size);
-        const quarter = element.rotation === 90 || element.rotation === 270;
-        if (
-          !inside(
-            x,
-            y,
-            quarter ? m.ascent + m.descent : m.width,
-            quarter ? m.width : m.ascent + m.descent,
-            layout.cardWidth,
-            layout.cardHeight,
-          )
+      const extent = elementExtent(
+        element,
+        layout.cardWidth,
+        layout.cardHeight,
+        textEnvelope(element, project.sequence, metrics),
+      );
+      if (
+        !inside(
+          x,
+          y,
+          extent.width,
+          extent.height,
+          layout.cardWidth,
+          layout.cardHeight,
         )
-          throw new Error(
-            `Un ${element.kind === "text" ? "texto" : "número"} del ${face === "front" ? "frente" : "reverso"} sale de la tarjeta. Ajusta su posición o tamaño.`,
-          );
-      }
+      )
+        throw new Error(
+          `Un ${element.kind === "text" ? "texto" : "número"} del ${face === "front" ? "frente" : "reverso"} sale de la tarjeta. Ajusta su posición o tamaño.`,
+        );
     }
   }
   return layout;

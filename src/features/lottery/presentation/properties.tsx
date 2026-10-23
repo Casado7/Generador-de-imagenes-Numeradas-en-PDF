@@ -25,6 +25,7 @@ import {
 import { Choice, NumberField, TextField } from "./controls";
 import type { Face, Project, TicketElement, Rotation } from "../domain/model";
 import { faceIsNumbered } from "../domain/composition";
+import { canDuplicate, canRemove } from "./element-actions";
 
 export function Properties({
   form,
@@ -33,6 +34,8 @@ export function Properties({
   selected,
   onSelect,
   busy,
+  onDuplicate,
+  onRemove,
 }: {
   form: UseFormReturn<Project>;
   project: Project;
@@ -40,6 +43,8 @@ export function Properties({
   selected: string | null;
   onSelect: (id: string | null) => void;
   busy: boolean;
+  onDuplicate: (id: string) => void;
+  onRemove: (id: string) => void;
 }) {
   const elements = project.elements[face],
     index = elements.findIndex((e) => e.id === selected),
@@ -77,7 +82,10 @@ export function Properties({
     <Card>
       <CardHeader>
         <CardTitle>Personaliza tu boleto</CardTitle>
-        <CardDescription>Coloca los elementos sobre tu imagen.</CardDescription>
+        <CardDescription>
+          Usa los tiradores del boleto para tamaño y giro. Aquí tienes los
+          ajustes precisos de fuente, color y posición.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <FieldGroup>
@@ -275,17 +283,8 @@ export function Properties({
                   type="button"
                   variant="outline"
                   size="sm"
-                  disabled={
-                    busy ||
-                    elements.filter((e) => e.kind === element.kind).length >=
-                      (element.kind === "cover" ? 8 : 4)
-                  }
-                  onClick={() =>
-                    add(element.kind, {
-                      ...element,
-                      x: Math.min(0.85, element.x + 0.1),
-                    })
-                  }
+                  disabled={busy || !canDuplicate(element, elements)}
+                  onClick={() => onDuplicate(element.id)}
                 >
                   <Copy data-icon="inline-start" />
                   Duplicar
@@ -296,19 +295,9 @@ export function Properties({
                   size="sm"
                   disabled={
                     busy ||
-                    (element.kind === "sequence" &&
-                      elements.filter((e) => e.kind === "sequence").length ===
-                        1 &&
-                      faceIsNumbered(project, face))
+                    !canRemove(element, elements, faceIsNumbered(project, face))
                   }
-                  onClick={() => {
-                    form.setValue(
-                      path,
-                      elements.filter((e) => e.id !== element.id),
-                      { shouldValidate: true },
-                    );
-                    onSelect(null);
-                  }}
+                  onClick={() => onRemove(element.id)}
                 >
                   <Trash2 data-icon="inline-start" />
                   Eliminar
